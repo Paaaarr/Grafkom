@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Judul Halaman -->
-    <title>WebGL 2 - Kubus Bertekstur ("b.jpg")</title>
+    <!-- Mengubah Judul Halaman -->
+    <title>WebGL 2 - Kubus Tekstur</title>
     <style>
-        /* Style Frontend */
+        /* Mengubah Style Frontend */
         html, body {
             margin: 0;
             padding: 0;
             overflow: hidden; /* Mencegah scroll bar */
             height: 100%;
-            /* Warna latar belakang */
+            /* Mengubah warna latar belakang */
             background-color: #0a0a0a; /* Latar belakang sangat gelap */
-            font-family: Arial, sans-serif; /* Font */
+            font-family: Arial, sans-serif; /* Mengubah font */
             color: #ffffff; /* Warna teks default putih */
         }
         canvas {
             display: block; /* Mencegah spasi ekstra di bawah canvas */
             width: 100%;
             height: 100%;
-            border: none; /* Hapus border */
-            box-sizing: border-box; /* Pastikan border tidak menambah ukuran */
+             border: none; /* Hapus border */
+             box-sizing: border-box; /* Pastikan border tidak menambah ukuran */
         }
-        /* Style untuk teks informasi */
+        /* Menambahkan style untuk teks informasi */
         #info {
-            position: absolute;
-            top: 10px; /* Jarak dari atas */
-            left: 10px; /* Jarak dari kiri */
-            color: #ffffff; /* Warna teks putih */
-            font-size: 14px; /* Ukuran font */
-            text-shadow: 1px 1px 1px #000; /* Bayangan teks agar lebih terbaca */
-            pointer-events: none; /* Agar teks tidak menghalangi interaksi */
-            background-color: rgba(0, 0, 0, 0.3); /* Latar belakang semi-transparan */
-            padding: 5px 10px;
-            border-radius: 3px;
+             position: absolute;
+             top: 10px; /* Jarak dari atas */
+             left: 10px; /* Jarak dari kiri */
+             color: #ffffff; /* Warna teks putih */
+             font-size: 14px; /* Ukuran font */
+             text-shadow: 1px 1px 1px #000; /* Bayangan teks agar lebih terbaca */
+             pointer-events: none; /* Agar teks tidak menghalangi interaksi */
+             background-color: rgba(0, 0, 0, 0.3); /* Latar belakang semi-transparan */
+             padding: 5px 10px;
+             border-radius: 3px;
         }
     </style>
-    <!-- Muat library gl-matrix untuk operasi matriks -->
+    <!-- Muat library gl-matrix -->
     <script src="https://cdn.jsdelivr.net/npm/gl-matrix@3.4.3/gl-matrix-min.js"></script>
 </head>
 <body>
     <canvas id="webgl-canvas"></canvas>
-    <div id="info">Kubus Bertekstur</div>
+    <div id="info">Kubus 3D Bertekstur</div>
 
     <!-- Vertex Shader (GLSL ES 300) -->
     <script id="vertex-shader" type="x-shader/x-vertex">#version 300 es
     // Atribut input dari buffer
     in vec3 a_position;
-    in vec2 a_texCoord; // Atribut untuk koordinat tekstur
+    in vec2 a_texCoord; // Atribut baru untuk koordinat tekstur
 
     // Uniform (variabel global dari JavaScript)
     uniform mat4 u_projectionMatrix;
@@ -57,13 +57,13 @@
     uniform mat4 u_modelMatrix;
 
     // Output ke fragment shader
-    out vec2 v_texCoord; // Output koordinat tekstur
+    out vec2 v_texCoord; // Teruskan koordinat tekstur
 
     void main() {
         // Hitung posisi akhir vertex dalam clip space
         gl_Position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * vec4(a_position, 1.0);
 
-        // Teruskan koordinat tekstur ke fragment shader
+        // Teruskan koordinat tekstur
         v_texCoord = a_texCoord;
     }
     </script>
@@ -75,31 +75,29 @@
     // Input dari vertex shader
     in vec2 v_texCoord;
 
-    // Uniform untuk tekstur (sampler 2D)
-    uniform sampler2D u_texture;
+    // Uniforms
+    uniform sampler2D u_texture; // Uniform baru untuk tekstur
 
     // Output color
     out vec4 outColor;
 
     void main() {
-        // Ambil warna dari tekstur menggunakan koordinat tekstur yang diinterpolasi
-        // Ini menggantikan perhitungan pencahayaan; warna murni diambil dari tekstur.
+        // Ambil warna dari tekstur menggunakan koordinat tekstur
         outColor = texture(u_texture, v_texCoord);
     }
     </script>
 
     <!-- Kode JavaScript Utama -->
     <script>
-        // Tunggu DOM siap sebelum menjalankan kode WebGL
+        // Tunggu DOM siap
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('webgl-canvas');
-            const gl = canvas.getContext('webgl2'); // Dapatkan konteks WebGL2
+            const gl = canvas.getContext('webgl2');
 
-            // Periksa apakah WebGL2 didukung
             if (!gl) {
                 console.error("WebGL 2 tidak didukung di browser ini.");
                 alert("WebGL 2 tidak didukung. Silakan gunakan browser modern seperti Chrome atau Firefox.");
-                return; // Berhenti jika WebGL2 tidak tersedia
+                return;
             }
 
             // === Inisialisasi Shader & Program ===
@@ -107,81 +105,68 @@
             const fsSource = document.getElementById('fragment-shader').textContent;
             const shaderProgram = initShaderProgram(gl, vsSource, fsSource); // Fungsi helper di bawah
 
-            if (!shaderProgram) return; // Berhenti jika shader gagal diinisialisasi
+            if (!shaderProgram) return; // Berhenti jika shader gagal
 
-            // Dapatkan lokasi atribut dan uniform dari program shader
+            // Dapatkan lokasi atribut dan uniform
             const programInfo = {
                 program: shaderProgram,
                 attribLocations: {
-                    vertexPosition: gl.getAttribLocation(shaderProgram, 'a_position'), // Lokasi atribut posisi
-                    texCoord: gl.getAttribLocation(shaderProgram, 'a_texCoord'),     // Lokasi atribut koordinat tekstur
+                    vertexPosition: gl.getAttribLocation(shaderProgram, 'a_position'),
+                    vertexTexCoord: gl.getAttribLocation(shaderProgram, 'a_texCoord'), // Lokasi atribut tekstur
                 },
                 uniformLocations: {
-                    projectionMatrix: gl.getUniformLocation(shaderProgram, 'u_projectionMatrix'), // Lokasi uniform matriks proyeksi
-                    viewMatrix: gl.getUniformLocation(shaderProgram, 'u_viewMatrix'),       // Lokasi uniform matriks view
-                    modelMatrix: gl.getUniformLocation(shaderProgram, 'u_modelMatrix'),      // Lokasi uniform matriks model
-                    u_texture: gl.getUniformLocation(shaderProgram, 'u_texture'),           // Lokasi uniform tekstur sampler
+                    projectionMatrix: gl.getUniformLocation(shaderProgram, 'u_projectionMatrix'),
+                    viewMatrix: gl.getUniformLocation(shaderProgram, 'u_viewMatrix'),
+                    modelMatrix: gl.getUniformLocation(shaderProgram, 'u_modelMatrix'),
+                    texture: gl.getUniformLocation(shaderProgram, 'u_texture'), // Lokasi uniform tekstur
                 },
             };
 
-             // Lakukan cek error untuk lokasi atribut/uniform
-             if (programInfo.attribLocations.vertexPosition === -1 ||
-                 programInfo.attribLocations.texCoord === -1 ||
-                 programInfo.uniformLocations.projectionMatrix === null ||
-                 programInfo.uniformLocations.viewMatrix === null ||
-                 programInfo.uniformLocations.modelMatrix === null ||
-                 programInfo.uniformLocations.u_texture === null) {
-                 console.error("Gagal mendapatkan lokasi satu atau lebih atribut/uniform. Cek nama di shader dan kode JS.");
-                 // console.log("Program Info:", programInfo); // Debugging detail
-                 alert("Gagal menyiapkan WebGL (shader error). Cek console browser.");
-                 return;
-             }
+             // === Definisi Geometri Kubus (Dengan Koordinat Tekstur) ===
+             // Kita perlu 24 vertex (4 per sisi * 6 sisi) karena koordinat tekstur (dan posisi) berbeda per vertex.
+             // Data vertex: [Posisi X, Y, Z, TexCoord U, V]
 
+             const cubeVertices = new Float32Array([
+                 // Depan (+Z) - TexCoords (menggunakan seluruh tekstur per sisi)
+                 -0.5, -0.5,  0.5,   0.0, 0.0, // V0 (Bottom-Left)
+                  0.5, -0.5,  0.5,   1.0, 0.0, // V1 (Bottom-Right)
+                  0.5,  0.5,  0.5,   1.0, 1.0, // V2 (Top-Right)
+                 -0.5,  0.5,  0.5,   0.0, 1.0, // V3 (Top-Left)
 
-            // === Definisi Geometri Kubus (dengan Koordinat Tekstur) ===
-            // Untuk kubus bertekstur, kita perlu 24 vertex (4 per sisi * 6 sisi)
-            // karena koordinat tekstur biasanya berbeda per sisi.
-            // Data vertex: [Posisi X, Y, Z, TexCoord U, V]
-            const cubeVertices = new Float32Array([
-                // Depan (+Z) - TexCoord: (0,0) (1,0) (1,1) (0,1)
-                -0.5, -0.5,  0.5,   0.0, 0.0, // V0 - bottom-left
-                 0.5, -0.5,  0.5,   1.0, 0.0, // V1 - bottom-right
-                 0.5,  0.5,  0.5,   1.0, 1.0, // V2 - top-right
-                -0.5,  0.5,  0.5,   0.0, 1.0, // V3 - top-left
+                 // Belakang (-Z) - TexCoords (perhatikan urutan vertex untuk normal/orientasi)
+                 -0.5, -0.5, -0.5,   1.0, 0.0, // V4 (Bottom-Right relative to viewer from front)
+                 -0.5,  0.5, -0.5,   1.0, 1.0, // V5 (Top-Right relative to viewer from front)
+                  0.5,  0.5, -0.5,   0.0, 1.0, // V6 (Top-Left relative to viewer from front)
+                  0.5, -0.5, -0.5,   0.0, 0.0, // V7 (Bottom-Left relative to viewer from front)
 
-                // Belakang (-Z) - TexCoord: (0,0) (1,0) (1,1) (0,1) - mapped "backward" from front view
-                -0.5, -0.5, -0.5,   1.0, 0.0, // V4 - bottom-right (from +Z view) -> becomes (0,0) for -Z face
-                -0.5,  0.5, -0.5,   1.0, 1.0, // V5 - top-right   -> becomes (0,1)
-                 0.5,  0.5, -0.5,   0.0, 1.0, // V6 - top-left    -> becomes (1,1)
-                 0.5, -0.5, -0.5,   0.0, 0.0, // V7 - bottom-left -> becomes (1,0)
+                 // Atas (+Y) - TexCoords
+                 -0.5,  0.5,  0.5,   0.0, 1.0, // V8 (Top-Left)
+                  0.5,  0.5,  0.5,   1.0, 1.0, // V9 (Top-Right)
+                  0.5,  0.5, -0.5,   1.0, 0.0, // V10 (Bottom-Right)
+                 -0.5,  0.5, -0.5,   0.0, 0.0, // V11 (Bottom-Left)
 
-                // Atas (+Y) - TexCoord: (0,0) (1,0) (1,1) (0,1)
-                -0.5,  0.5,  0.5,   0.0, 0.0, // V8 - bottom-left
-                 0.5,  0.5,  0.5,   1.0, 0.0, // V9 - bottom-right
-                 0.5,  0.5, -0.5,   1.0, 1.0, // V10 - top-right
-                -0.5,  0.5, -0.5,   0.0, 1.0, // V11 - top-left
+                 // Bawah (-Y) - TexCoords
+                 -0.5, -0.5,  0.5,   0.0, 0.0, // V12 (Top-Left relative to viewer looking up)
+                 -0.5, -0.5, -0.5,   0.0, 1.0, // V13 (Bottom-Left relative to viewer looking up)
+                  0.5, -0.5, -0.5,   1.0, 1.0, // V14 (Bottom-Right relative to viewer looking up)
+                  0.5, -0.5,  0.5,   1.0, 0.0, // V15 (Top-Right relative to viewer looking up)
 
-                // Bawah (-Y) - TexCoord: (0,0) (1,0) (1,1) (0,1) - mapped to be readable from below
-                -0.5, -0.5,  0.5,   0.0, 0.0, // V12 - bottom-left
-                -0.5, -0.5, -0.5,   0.0, 1.0, // V13 - top-left
-                 0.5, -0.5, -0.5,   1.0, 1.0, // V14 - top-right
-                 0.5, -0.5,  0.5,   1.0, 0.0, // V15 - bottom-right
+                 // Kanan (+X) - TexCoords
+                  0.5, -0.5,  0.5,   0.0, 0.0, // V16 (Bottom-Left)
+                  0.5, -0.5, -0.5,   1.0, 0.0, // V17 (Bottom-Right)
+                  0.5,  0.5, -0.5,   1.0, 1.0, // V18 (Top-Right)
+                  0.5,  0.5,  0.5,   0.0, 1.0, // V19 (Top-Left)
 
-                // Kanan (+X) - TexCoord: (0,0) (1,0) (1,1) (0,1)
-                 0.5, -0.5,  0.5,   0.0, 0.0, // V16 - bottom-left
-                 0.5, -0.5, -0.5,   1.0, 0.0, // V17 - bottom-right
-                 0.5,  0.5, -0.5,   1.0, 1.0, // V18 - top-right
-                 0.5,  0.5,  0.5,   0.0, 1.0, // V19 - top-left
+                 // Kiri (-X) - TexCoords
+                 -0.5, -0.5,  0.5,   1.0, 0.0, // V20 (Bottom-Right relative to viewer looking from right)
+                 -0.5,  0.5,  0.5,   1.0, 1.0, // V21 (Top-Right relative to viewer looking from right)
+                 -0.5,  0.5, -0.5,   0.0, 1.0, // V22 (Top-Left relative to viewer looking from right)
+                 -0.5, -0.5, -0.5,   0.0, 0.0  // V23 (Bottom-Left relative to viewer looking from right)
+             ]);
 
-                // Kiri (-X) - TexCoord: (0,0) (1,0) (1,1) (0,1) - mapped "backward" from right view
-                -0.5, -0.5,  0.5,   1.0, 0.0, // V20 - bottom-right (from +X view) -> becomes (0,0) for -X face
-                -0.5,  0.5,  0.5,   1.0, 1.0, // V21 - top-right   -> becomes (0,1)
-                -0.5,  0.5, -0.5,   0.0, 1.0, // V22 - top-left    -> becomes (1,1)
-                -0.5, -0.5, -0.5,   0.0, 0.0  // V23 - bottom-left -> becomes (1,0)
-            ]);
 
             // Indeks untuk menggambar segitiga (6 indeks per sisi * 6 sisi = 36 indeks)
-            // Setiap 4 vertex mendefinisikan satu sisi, digambar sebagai 2 segitiga
+            // Setiap 4 vertex mendefinisikan satu sisi
             const cubeIndices = new Uint16Array([
                  0,  1,  2,    0,  2,  3, // Depan (V0, V1, V2, V3)
                  4,  5,  6,    4,  6,  7, // Belakang (V4, V5, V6, V7)
@@ -191,12 +176,12 @@
                 20, 21, 22,   20, 22, 23, // Kiri (V20, V21, V22, V23)
             ]);
 
-            // === Setup Buffer (VAO, VBO, EBO) ===
-            // Buat Vertex Array Object (VAO) untuk menyimpan konfigurasi atribut
+            // === Setup Buffer ===
+            // Buat Vertex Array Object (VAO)
             const vao = gl.createVertexArray();
-            gl.bindVertexArray(vao); // Mulai konfigurasi VAO ini
+            gl.bindVertexArray(vao); // Mulai konfigurasi VAO
 
-            // Buat Vertex Buffer Object (VBO) untuk data vertex (posisi, texcoord)
+            // Buat Vertex Buffer Object (VBO) untuk data vertex
             const vbo = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
             gl.bufferData(gl.ARRAY_BUFFER, cubeVertices, gl.STATIC_DRAW);
@@ -206,215 +191,238 @@
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cubeIndices, gl.STATIC_DRAW);
 
-            // Konfigurasi Atribut Vertex (untuk memberitahu WebGL cara membaca data di VBO)
-            const stride = (3 + 2) * Float32Array.BYTES_PER_ELEMENT; // 3 float Posisi + 2 float TexCoord = 5 float * 4 byte/float = 20 bytes per vertex
+            // Konfigurasi Atribut Vertex
+            // Stride: 3 (pos) + 2 (texCoord) = 5 float * 4 byte/float = 20 bytes
+            const stride = (3 + 2) * Float32Array.BYTES_PER_ELEMENT;
 
-            // Atribut Posisi (a_position): 3 float, dimulai dari offset 0
+            // Atribut Posisi (vec3)
             gl.vertexAttribPointer(
                 programInfo.attribLocations.vertexPosition,
                 3,          // size (vec3)
-                gl.FLOAT,   // type (Float32Array)
-                false,      // normalized (tidak perlu untuk posisi)
-                stride,     // stride (total byte per vertex)
-                0           // offset (byte dari awal vertex)
+                gl.FLOAT,   // type
+                false,      // normalized
+                stride,     // stride (bytes per vertex)
+                0           // offset (bytes from start of vertex)
             );
-            gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition); // Aktifkan atribut ini
+            gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
 
-            // Atribut Koordinat Tekstur (a_texCoord): 2 float, dimulai dari offset 12 (setelah 3 posisi)
+            // Atribut Koordinat Tekstur (vec2)
             gl.vertexAttribPointer(
-                programInfo.attribLocations.texCoord,
+                programInfo.attribLocations.vertexTexCoord,
                 2,          // size (vec2)
-                gl.FLOAT,   // type (Float32Array)
-                false,      // normalized (tidak perlu untuk texcoord)
+                gl.FLOAT,   // type
+                false,      // normalized
                 stride,     // stride
-                3 * Float32Array.BYTES_PER_ELEMENT // offset (setelah 3 float posisi = 12 byte)
+                3 * Float32Array.BYTES_PER_ELEMENT // offset (setelah 3 float posisi)
             );
-            gl.enableVertexAttribArray(programInfo.attribLocations.texCoord); // Aktifkan atribut ini
+            gl.enableVertexAttribArray(programInfo.attribLocations.vertexTexCoord);
 
             // Selesai konfigurasi VAO, unbind untuk mencegah modifikasi tak sengaja
             gl.bindVertexArray(null);
-            // Unbind buffer juga (opsional karena VAO sudah mengingatnya, tapi praktik baik)
+            // Kita juga bisa unbind buffer, tapi VAO sudah mengingatnya
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-
-             // === Setup Tekstur ===
-             const texture = gl.createTexture(); // Buat objek tekstur WebGL baru
-
-             // Muat gambar tekstur dari 'b.png'
-             const image = new Image();
-
-             // === PENTING: Fungsi yang dijalankan ketika gambar berhasil dimuat ===
-             image.onload = function() {
-                 console.log("Gambar 'b.png' berhasil dimuat. Mengunggah ke GPU...");
-
-                 gl.bindTexture(gl.TEXTURE_2D, texture); // Bind tekstur kita sebelum mengunggah/mengkonfigurasi
-
-                 // Unggah data gambar ke tekstur WebGL
-                 // gl.texImage2D(target, level, internalformat, format, type, sourceImage)
-                 gl.texImage2D(gl.TEXTURE_2D, // target: ini adalah tekstur 2D
-                               0,           // level: level mipmap (0 adalah level dasar/ukuran asli)
-                               gl.RGBA,     // internalformat: format data yang disimpan di GPU (misal, butuh alpha?)
-                               gl.RGBA,     // format: format data dari gambar sumber
-                               gl.UNSIGNED_BYTE, // type: tipe data dari gambar sumber (byte 0-255)
-                               image);        // sourceImage: elemen HTML Image yang sudah dimuat
-
-                 // --- Konfigurasi parameter tekstur ---
-
-                 // Wrap mode (apa yang terjadi jika koordinat tekstur > 1 atau < 0)
-                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); // Untuk sumbu S (U)
-                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); // Untuk sumbu T (V)
-                 // Opsi lain: gl.REPEAT (mengulang tekstur), gl.MIRRORED_REPEAT (mengulang dan membalik)
-
-                 // Filtering (cara warna diambil dari tekstur saat tidak pas 1:1 dengan piksel)
-                 // GL_LINEAR_MIPMAP_LINEAR untuk MIN_FILTER memberikan kualitas terbaik dengan mipmaps
-                 gl.generateMipmap(gl.TEXTURE_2D); // Hasilkan mipmaps secara otomatis dari gambar level 0
-                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); // Filter saat objek mengecil (minifikasi)
-                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); // Filter saat objek membesar (magnifikasi)
-                 // Jika Anda tidak menggunakan mipmaps (atau gambar bukan 'power of two' di WebGL1), gunakan:
-                 // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
-                 gl.bindTexture(gl.TEXTURE_2D, null); // Unbind tekstur setelah selesai konfigurasi
-
-                 console.log("Tekstur siap. Memulai rendering...");
-                 // === Mulai loop rendering HANYA setelah tekstur siap ===
-                 resize(); // Panggil resize lagi untuk memastikan ukuran dan proyeksi final
-                 requestAnimationFrame(render); // Mulai loop render utama
-             };
-
-             // --- Fungsi yang dijalankan jika gambar gagal dimuat ---
-             image.onerror = function() {
-                 console.error("Gagal memuat gambar tekstur 'b.png'.");
-                 console.error("Pastikan file 'b.png' ada di direktori yang sama dengan file HTML ini.");
-                 console.error("Jika Anda menjalankan dari file lokal (file://), coba jalankan melalui server web lokal.");
-                 alert("Gagal memuat tekstur gambar. Lihat console browser (F12) untuk detail.");
-             };
-
-             // === Mulai memuat gambar ===
-             // Ini akan memicu event 'onload' atau 'onerror' ketika selesai.
-             image.src = 'b.png';
+            // === Load Tekstur ===
+            let cubeTexture = null; // Variabel untuk menyimpan objek tekstur
+            // Pastikan nama file di sini BENAR dan file ada di lokasi yang bisa diakses server
+            loadTexture(gl, 'Bb.png').then(texture => {
+                cubeTexture = texture;
+                console.log("Tekstur 'Bb.png' berhasil dimuat.");
+                // Mulai render loop setelah tekstur dimuat
+                requestAnimationFrame(render);
+            }).catch(error => {
+                 console.error("Gagal memuat tekstur:", error);
+                 alert("Gagal memuat tekstur 'Bb.png'. Pastikan file ada di direktori yang sama DAN Anda menjalankannya melalui server web lokal.");
+            });
 
 
             // === Matriks & Kamera ===
-            const projectionMatrix = glMatrix.mat4.create(); // Matriks proyeksi
-            const viewMatrix = glMatrix.mat4.create();       // Matriks view (kamera)
-            const modelMatrix = glMatrix.mat4.create();      // Matriks model (transformasi objek)
+            const projectionMatrix = glMatrix.mat4.create();
+            const viewMatrix = glMatrix.mat4.create();
+            const modelMatrix = glMatrix.mat4.create();
 
-            // Pengaturan kamera
-            const cameraPosition = glMatrix.vec3.fromValues(0, 1, 4); // Posisi kamera di world space
+            const cameraPosition = glMatrix.vec3.fromValues(0, 1, 4); // Posisi kamera
             const lookAtPosition = glMatrix.vec3.fromValues(0, 0, 0); // Titik yang dilihat kamera
-            const upDirection = glMatrix.vec3.fromValues(0, 1, 0);   // Arah 'atas' relatif kamera
-            glMatrix.mat4.lookAt(viewMatrix, cameraPosition, lookAtPosition, upDirection); // Hitung matriks view
+            const upDirection = glMatrix.vec3.fromValues(0, 1, 0);   // Arah 'atas' kamera
+            glMatrix.mat4.lookAt(viewMatrix, cameraPosition, lookAtPosition, upDirection);
 
-            // === Variabel untuk Animasi Rotasi ===
+            // === Pengaturan Awal & Loop Render ===
+            gl.enable(gl.DEPTH_TEST); // Aktifkan pengujian kedalaman
+            gl.depthFunc(gl.LEQUAL); // Objek yang lebih dekat atau sama kedalamannya akan digambar
+            gl.clearColor(0.1, 0.1, 0.1, 1.0); // Warna latar belakang agak gelap
+
             let rotationAngleX = 0; // Sudut rotasi sumbu X
             let rotationAngleY = 0; // Sudut rotasi sumbu Y
             let rotationAngleZ = 0; // Sudut rotasi sumbu Z
-            let lastTime = 0; // Waktu frame sebelumnya (untuk menghitung deltaTime)
+            let lastTime = 0; // Waktu frame sebelumnya
 
-            // === Loop Utama Render ===
-            // Fungsi ini akan dipanggil oleh requestAnimationFrame setiap kali browser siap menggambar frame baru
+            // Loop utama render
             function render(time) {
-                time *= 0.001; // Konversi waktu dari milidetik ke detik
-                const deltaTime = time - lastTime; // Waktu yang berlalu sejak frame terakhir
+                time *= 0.001; // Konversi ke detik
+                const deltaTime = time - lastTime;
                 lastTime = time;
 
+                // --- UBAH ARAH DAN KECECEPATAN PUTARAN ---
                 // Atur kecepatan putaran per sumbu (radian per detik)
-                const rotateSpeedX = 0.4;
-                const rotateSpeedY = 0.3;
-                const rotateSpeedZ = -0.2; // Putar ke arah berlawanan pada sumbu Z
+                const rotateSpeedX = 0.4; // Lebih cepat rotasi X
+                const rotateSpeedY = 0.3; // Sedikit lebih lambat rotasi Y
+                const rotateSpeedZ = -0.2; // Rotasi Z ke arah berlawanan dan paling lambat
 
-                // Tambahkan deltaTime * kecepatan ke sudut rotasi saat ini
+                // Tambahkan deltaTime ke sudut rotasi
                 rotationAngleX += deltaTime * rotateSpeedX;
                 rotationAngleY += deltaTime * rotateSpeedY;
                 rotationAngleZ += deltaTime * rotateSpeedZ;
 
-                // Reset matriks model ke matriks identitas sebelum menerapkan transformasi
+                // Reset matriks model ke identitas
                 glMatrix.mat4.identity(modelMatrix);
 
-                // Terapkan rotasi ke matriks model (urutan rotasi mempengaruhi hasil)
-                glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleY, [0, 1, 0]); // Rotasi di sekitar sumbu Y (dunia)
-                glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleX, [1, 0, 0]); // Rotasi di sekitar sumbu X (dunia)
-                glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleZ, [0, 0, 1]); // Rotasi di sekitar sumbu Z (dunia)
+                // Terapkan rotasi satu per satu (urutan mempengaruhi hasil)
+                // Contoh urutan rotasi: Y -> X -> Z (sumbu dunia)
+                 glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleY, [0, 1, 0]); // Rotasi di sekitar sumbu Y dunia
+                 glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleX, [1, 0, 0]); // Rotasi di sekitar sumbu X dunia
+                 glMatrix.mat4.rotate(modelMatrix, modelMatrix, rotationAngleZ, [0, 0, 1]); // Rotasi di sekitar sumbu Z dunia
 
 
                 // Hapus color buffer dan depth buffer dari frame sebelumnya
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                // Aktifkan program shader yang akan digunakan untuk menggambar
+                // Aktifkan program shader yang akan digunakan
                 gl.useProgram(programInfo.program);
 
-                // Kirim nilai uniform ke shader
-                // Matriks proyeksi, view, dan model
+                // Kirim nilai uniform matriks
                 gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
                 gl.uniformMatrix4fv(programInfo.uniformLocations.viewMatrix, false, viewMatrix);
                 gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, modelMatrix);
 
-                // Uniform Tekstur: Beri tahu shader unit tekstur mana yang digunakan
-                gl.activeTexture(gl.TEXTURE0); // Aktifkan unit tekstur 0 (minimal 8 unit tersedia di WebGL2)
-                gl.bindTexture(gl.TEXTURE_2D, texture); // Bind objek tekstur kita ke unit tekstur yang aktif (0)
-                gl.uniform1i(programInfo.uniformLocations.u_texture, 0); // Kirim index unit tekstur (0) ke uniform sampler2D 'u_texture' di shader
+                // Hanya render jika tekstur sudah dimuat
+                if (cubeTexture) {
+                    // Aktifkan unit tekstur 0
+                    gl.activeTexture(gl.TEXTURE0);
+                    // Bind tekstur ke unit aktif (TEXTURE0)
+                    gl.bindTexture(gl.TEXTURE_2D, cubeTexture);
+                    // Beri tahu shader bahwa uniform u_texture harus menggunakan tekstur dari unit 0
+                    gl.uniform1i(programInfo.uniformLocations.texture, 0);
 
-                // Bind VAO yang menyimpan konfigurasi VBO, EBO, dan layout atribut
-                gl.bindVertexArray(vao);
+                    // Bind VAO (ini akan mengaktifkan VBO, EBO, dan konfigurasi atribut yang sesuai)
+                    gl.bindVertexArray(vao);
 
-                // Gambar kubus menggunakan data indeks
-                gl.drawElements(
-                    gl.TRIANGLES,       // Mode gambar: gambar segitiga
-                    cubeIndices.length, // Jumlah indeks yang akan digambar (36 untuk kubus)
-                    gl.UNSIGNED_SHORT,  // Tipe data indeks (Uint16Array)
-                    0                   // Offset dalam buffer indeks (mulai dari awal)
-                );
+                    // Gambar kubus menggunakan indeks
+                    gl.drawElements(
+                        gl.TRIANGLES,       // Mode gambar: gambar segitiga
+                        cubeIndices.length, // Jumlah indeks yang akan digambar (36 untuk kubus)
+                        gl.UNSIGNED_SHORT,  // Tipe data indeks (Uint16Array)
+                        0                   // Offset dalam buffer indeks (mulai dari awal)
+                    );
 
-                // Unbind VAO dan Tekstur setelah selesai menggambar (praktik yang baik)
-                gl.bindVertexArray(null);
-                gl.bindTexture(gl.TEXTURE_2D, null);
+                    // Unbind VAO (opsional tapi praktik yang baik)
+                    gl.bindVertexArray(null);
+                    // Unbind tekstur (opsional)
+                    gl.bindTexture(gl.TEXTURE_2D, null);
+                } else {
+                    // Opsional: Gambar sesuatu atau tampilkan pesan jika tekstur belum dimuat
+                    // console.warn("Tekstur belum dimuat, skipping render.");
+                }
 
 
-                // Minta browser untuk memanggil fungsi render lagi pada frame berikutnya
+                // Minta frame berikutnya
                 requestAnimationFrame(render);
             }
 
-             // === Penanganan Resize Window ===
-             // Fungsi ini dipanggil setiap kali ukuran window berubah
+             // === Penanganan Resize ===
              function resize() {
-                // Dapatkan ukuran tampilan canvas dalam piksel (didefinisikan oleh CSS)
+                // Dapatkan ukuran tampilan canvas dalam piksel (dari CSS)
                 const displayWidth = canvas.clientWidth;
                 const displayHeight = canvas.clientHeight;
 
-                // Periksa apakah ukuran drawing buffer canvas perlu diubah
+                // Periksa apakah ukuran canvas benar-benar berubah
                 if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-                    // Sesuaikan ukuran drawing buffer canvas dengan ukuran display
+                    // Sesuaikan ukuran buffer gambar dengan ukuran display
                     canvas.width = displayWidth;
                     canvas.height = displayHeight;
 
-                    // Set viewport WebGL agar sesuai dengan ukuran drawing buffer canvas
+                    // Set viewport WebGL agar sesuai dengan ukuran drawing buffer
                     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-                    // Hitung ulang matriks proyeksi dengan aspek rasio yang baru
+                    // Hitung ulang matriks proyeksi dengan aspek rasio baru
                     const fieldOfView = 45 * Math.PI / 180; // dalam radian (45 derajat)
                     const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight;
                     const zNear = 0.1; // Objek lebih dekat dari ini akan di-klip
                     const zFar = 100.0; // Objek lebih jauh dari ini akan di-klip
                     glMatrix.mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
-                    console.log(`Canvas resized to: ${gl.drawingBufferWidth}x${gl.drawingBufferHeight}, Aspect: ${aspect.toFixed(2)}`);
+                    console.log(`Resized to: ${gl.drawingBufferWidth}x${gl.drawingBufferHeight}, Aspect: ${aspect.toFixed(2)}`);
                 }
             }
 
-            // Panggil resize sekali di awal untuk setup awal viewport dan proyeksi
-            // Perhatian: Loop render belum dimulai di sini.
-            // resize(); // Tidak perlu memanggil render di sini lagi karena dipanggil di image.onload
+             // === Fungsi untuk Memuat Tekstur ===
+             // Mengembalikan Promise yang me-resolve dengan objek tekstur WebGL
+            function loadTexture(gl, url) {
+                return new Promise((resolve, reject) => {
+                    const texture = gl.createTexture(); // Buat objek tekstur
+                    gl.bindTexture(gl.TEXTURE_2D, texture); // Bind objek tekstur ke target TEXTURE_2D
 
-            // Tambahkan event listener untuk memanggil resize saat window diubah ukurannya
+                    // Isi tekstur dengan pixel 1x1 saat gambar dimuat
+                    // Ini mencegah WebGL membuat peringatan atau error
+                    // jika mencoba menggambar sebelum gambar selesai dimuat
+                    // dan memberikan placeholder visual sementara
+                    const initialPixel = new Uint8Array([0, 0, 255, 255]); // Biru Solid (bisa diganti warna lain)
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, initialPixel);
+
+                    const image = new Image(); // Buat objek Image DOM
+                    image.onload = function() {
+                        gl.bindTexture(gl.TEXTURE_2D, texture); // Bind kembali tekstur
+                        // Unggah data gambar ke tekstur
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+                        // Atur parameter tekstur
+                        // Jika gambar adalah power-of-2, kita bisa menggunakan mipmap
+                        // Jika bukan, kita perlu menggunakan CLAMP_TO_EDGE dan filter non-mipmap
+                        if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+                            gl.generateMipmap(gl.TEXTURE_2D); // Buat mipmap
+                            // Use tri-linear filtering for mipmaps
+                            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); // Magnifikasi selalu Linear
+                        } else {
+                             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); // Wrap S (horizontal)
+                             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); // Wrap T (vertical)
+                             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); // Filter minifikasi (tanpa mipmap)
+                             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); // Filter magnifikasi
+                        }
+
+                        // Unbind tekstur setelah konfigurasi selesai (opsional tapi baik)
+                        gl.bindTexture(gl.TEXTURE_2D, null);
+
+                        resolve(texture); // Selesaikan Promise dengan objek tekstur
+                    };
+
+                    image.onerror = function(e) {
+                        gl.deleteTexture(texture); // Hapus tekstur yang gagal
+                        reject(`Failed to load image: ${url}`); // Tolak Promise jika error
+                    };
+
+                    // Atur sumber gambar, ini akan memicu proses pemuatan
+                    image.src = url;
+                });
+            }
+
+             // Fungsi helper untuk memeriksa jika angka adalah power-of-2
+             function isPowerOf2(value) {
+                return (value & (value - 1)) === 0 && value !== 0;
+             }
+
+
+            // Panggil resize sekali di awal untuk setup awal
+            resize();
+
+            // Tambahkan event listener untuk resize window
             window.addEventListener('resize', resize);
 
-            // CATATAN: Loop render utama (requestAnimationFrame) akan dimulai di dalam image.onload
+            // requestAnimationFrame(render); // Panggilan ini dipindah ke dalam handler loadTexture
+        });
 
-        }); // Akhir dari DOMContentLoaded
-
-        // === Fungsi Helper untuk Shader ===
-        // Fungsi untuk memuat dan mengkompilasi shader (vertex atau fragment)
+        // === Fungsi Helper untuk Shader (Tidak Berubah) ===
+        // Fungsi untuk memuat dan mengkompilasi shader
         function loadShader(gl, type, source) {
             const shader = gl.createShader(type); // Buat objek shader baru (VERTEX_SHADER atau FRAGMENT_SHADER)
             gl.shaderSource(shader, source);     // Kirim kode sumber shader
@@ -422,8 +430,7 @@
 
             // Periksa apakah kompilasi berhasil
             if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                const info = gl.getShaderInfoLog(shader); // Dapatkan info log error
-                console.error('Error saat mengkompilasi shader:\n' + info);
+                console.error('Error saat mengkompilasi shader:', gl.getShaderInfoLog(shader));
                 gl.deleteShader(shader); // Hapus shader jika gagal
                 return null;
             }
@@ -432,11 +439,11 @@
 
         // Fungsi untuk membuat program shader dari vertex dan fragment shader
         function initShaderProgram(gl, vsSource, fsSource) {
-            const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);     // Muat dan kompilasi vertex shader
-            const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource); // Muat dan kompilasi fragment shader
+            const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);     // Muat vertex shader
+            const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource); // Muat fragment shader
 
             if (!vertexShader || !fragmentShader) {
-                return null; // Gagal jika salah satu shader tidak termuat/terkompilasi
+                return null; // Gagal jika salah satu shader tidak termuat
             }
 
             const shaderProgram = gl.createProgram(); // Buat objek program shader baru
@@ -446,19 +453,19 @@
 
             // Periksa apakah linking program berhasil
             if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                const info = gl.getProgramInfoLog(shaderProgram); // Dapatkan info log error
-                console.error('Error saat linking program shader:\n' + info);
+                console.error('Error saat linking program shader:', gl.getProgramInfoLog(shaderProgram));
                 gl.deleteProgram(shaderProgram); // Hapus program jika link gagal
                 gl.deleteShader(vertexShader);    // Hapus shader
                 gl.deleteShader(fragmentShader);
                 return null; // Gagal jika linking program gagal
             }
 
-            // Shader tidak lagi diperlukan setelah program di-link (opsional untuk detach, tapi delete sudah cukup)
-            gl.deleteShader(vertexShader);
-            gl.deleteShader(fragmentShader);
+            // Shader tidak lagi diperlukan setelah program di-link
+            // gl.detachShader(shaderProgram, vertexShader); // Opsional: detach shader dari program
+            // gl.deleteShader(vertexShader); // Sudah dihapus setelah link
+            // gl.deleteShader(fragmentShader); // Sudah dihapus setelah link
 
-            return shaderProgram; // Kembalikan program shader yang sudah siap digunakan
+            return shaderProgram; // Kembalikan program shader yang sudah siap
         }
 
     </script>
